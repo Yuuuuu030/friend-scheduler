@@ -10,7 +10,11 @@ import {
 } from "firebase/firestore";
 
 type PaintMode = "add" | "remove";
-
+type DateInfo = {
+  id: string;
+  weekday: string;
+  day: number;
+};
 export default function Availability() {
   const router = useRouter();
   const [selected, setSelected] = useState<string[]>([]);
@@ -27,8 +31,35 @@ export default function Availability() {
     useState("");
   const [isClosed, setIsClosed] =
     useState(false);
+  const [dates, setDates] =
+    useState<DateInfo[]>([]);
 
   useEffect(() => {
+    const generatedDates: DateInfo[] = [];
+
+    for (let i = 0; i < 14; i++) {
+      const date = new Date();
+
+      date.setDate(
+        date.getDate() + i
+      );
+
+      generatedDates.push({
+        id: date
+          .toISOString()
+          .split("T")[0],
+        weekday:
+          date.toLocaleDateString(
+            "en-US",
+            {
+              weekday: "short",
+            }
+          ),
+        day: date.getDate(),
+      });
+    }
+
+    setDates(generatedDates);
     const savedName =
       localStorage.getItem("name") || "";
 
@@ -91,24 +122,6 @@ export default function Availability() {
       initializePage();
     }
   }, []);
-
-  const dates = [];
-
-  for (let i = 0; i < 14; i++) {
-    const date = new Date();
-    date.setDate(date.getDate() + i);
-
-    dates.push({
-      id: date.toISOString().split("T")[0],
-      weekday: date.toLocaleDateString(
-        "en-US",
-        {
-          weekday: "short",
-        }
-      ),
-      day: date.getDate(),
-    });
-  }
 
   const week1 = dates.slice(0, 7);
   const week2 = dates.slice(7, 14);
